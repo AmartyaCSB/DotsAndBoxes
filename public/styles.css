@@ -381,6 +381,7 @@ label.field {
 .player-row:last-child { border-bottom: none; }
 .swatch { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
 .player-row-name { font-weight: 600; flex: 1; }
+.player-row-name.unnamed { font-weight: 500; font-style: italic; color: var(--text-muted); }
 .badge {
   font-size: 11px;
   background: var(--text);

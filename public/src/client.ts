@@ -1,5 +1,9 @@
 import PartySocket from 'partysocket';
+import { inject } from '@vercel/analytics';
 import type { Envelope, GameState, Move, PlayerProfile } from '../../party/types';
+
+// Vercel Web Analytics
+inject();
 import { getOrCreatePlayerId, getRoomIdFromUrl, getStoredName, setStoredName, roomUrl } from './url';
 import { initLobby, renderLobby } from './lobby';
 import { initBoard, renderBoard, applyMoveLocal, setPending, clearPending } from './ui';

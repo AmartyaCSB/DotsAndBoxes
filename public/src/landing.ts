@@ -1,4 +1,8 @@
 import { generateRoomId, isValidRoomId } from './url';
+import { inject } from '@vercel/analytics';
+
+// Vercel Web Analytics
+inject();
 
 declare const PARTYKIT_HOST: string;
 

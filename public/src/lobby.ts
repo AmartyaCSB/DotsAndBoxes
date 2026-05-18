@@ -107,15 +107,21 @@ export function renderLobby(state: GameState, me: PlayerProfile | null) {
   state.players.forEach(p => {
     const row = document.createElement('div');
     row.className = 'player-row';
+    const isMe = !!(me && p.id === me.id);
     const removeBtn = (iAmHost && p.isBot)
       ? `<button class="link-btn" data-remove-bot="${escapeHtml(p.id)}" aria-label="Remove ${escapeHtml(p.name)}">×</button>`
       : '';
+    const displayName = p.name
+      ? `<span class="player-row-name">${escapeHtml(p.name)}</span>`
+      : (isMe
+          ? `<span class="player-row-name unnamed">Pick a name above ↑</span>`
+          : `<span class="player-row-name unnamed">choosing a name…</span>`);
     row.innerHTML = `
       <span class="swatch" style="background:${p.color}"></span>
-      <span class="player-row-name">${escapeHtml(p.name || '(naming…)')}</span>
+      ${displayName}
       ${p.isBot ? '<span class="badge accent-badge">bot</span>' : ''}
       ${p.isHost ? '<span class="badge">host</span>' : ''}
-      ${me && p.id === me.id ? '<span class="badge muted">you</span>' : ''}
+      ${isMe ? '<span class="badge muted">you</span>' : ''}
       ${removeBtn}
     `;
     playersListEl.appendChild(row);
