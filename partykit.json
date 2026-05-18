@@ -2,6 +2,9 @@
   "$schema": "https://www.partykit.io/schema.json",
   "name": "dotsandboxes",
   "main": "party/index.ts",
+  "parties": {
+    "stats": "party/stats.ts"
+  },
   "compatibilityDate": "2024-09-01",
   "serve": "public"
 }

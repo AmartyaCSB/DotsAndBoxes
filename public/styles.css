@@ -81,6 +81,23 @@ body {
   letter-spacing: -0.02em;
   color: var(--text);
 }
+.stats-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 18px;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  background: var(--bg-soft);
+  margin-left: auto;
+}
+.stat { display: inline-flex; align-items: baseline; gap: 6px; }
+.stat-value { font-size: 16px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.stat-divider { width: 1px; height: 16px; background: var(--panel-border); }
+@media (max-width: 640px) {
+  .stats-banner { display: none; }
+}
 .theme-toggle {
   background: transparent;
   border: 1px solid var(--panel-border);

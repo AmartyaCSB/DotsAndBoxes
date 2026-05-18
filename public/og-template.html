@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>OG template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #ffffff;
+    color: #0a0a0a;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 70px 80px;
+    box-sizing: border-box;
+    position: relative;
+  }
+  .top { display: flex; align-items: center; gap: 18px; }
+  .logo { width: 56px; height: 56px; }
+  .brand-text { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; }
+  .headline {
+    font-size: 96px;
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -0.04em;
+    margin: 0;
+    max-width: 760px;
+  }
+  .accent { color: #06d6a0; }
+  .sub {
+    font-size: 26px;
+    color: #525252;
+    font-weight: 500;
+    margin-top: 24px;
+    max-width: 720px;
+  }
+  .bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .url {
+    font-size: 22px;
+    font-weight: 600;
+    color: #0a0a0a;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  .tags {
+    display: flex;
+    gap: 10px;
+  }
+  .tag {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1.5px solid #e5e7eb;
+    color: #404040;
+  }
+  .tag.accent-bg { background: #06d6a0; color: #04321f; border-color: #06d6a0; }
+
+  /* Decorative board in upper-right */
+  .board-art {
+    position: absolute;
+    top: 90px;
+    right: 80px;
+    width: 320px;
+    height: 320px;
+  }
+</style>
+</head>
+<body>
+  <!-- Decorative dots-and-boxes art -->
+  <svg class="board-art" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <!-- box fills -->
+    <rect x="50" y="50" width="50" height="50" fill="#cf6d8b" rx="3" />
+    <rect x="100" y="50" width="50" height="50" fill="#06d6a0" rx="3" />
+    <rect x="50" y="100" width="50" height="50" fill="#7981c3" rx="3" />
+    <!-- box labels -->
+    <text x="75" y="80" font-size="22" font-weight="700" text-anchor="middle" fill="rgba(0,0,0,0.55)" font-family="Inter">P2</text>
+    <text x="125" y="80" font-size="22" font-weight="700" text-anchor="middle" fill="rgba(0,0,0,0.55)" font-family="Inter">P1</text>
+    <text x="75" y="130" font-size="22" font-weight="700" text-anchor="middle" fill="rgba(0,0,0,0.55)" font-family="Inter">P4</text>
+    <!-- drawn lines (around filled boxes) -->
+    <g stroke="#0a0a0a" stroke-width="4" stroke-linecap="round">
+      <line x1="50" y1="50" x2="100" y2="50"/>
+      <line x1="100" y1="50" x2="150" y2="50"/>
+      <line x1="50" y1="100" x2="100" y2="100"/>
+      <line x1="100" y1="100" x2="150" y2="100"/>
+      <line x1="50" y1="150" x2="100" y2="150"/>
+      <line x1="50" y1="50" x2="50" y2="100"/>
+      <line x1="100" y1="50" x2="100" y2="100"/>
+      <line x1="150" y1="50" x2="150" y2="100"/>
+      <line x1="50" y1="100" x2="50" y2="150"/>
+      <line x1="100" y1="100" x2="100" y2="150"/>
+    </g>
+    <!-- empty dashed lines -->
+    <g stroke="#d4d4d8" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 5">
+      <line x1="50" y1="0" x2="100" y2="0"/>
+      <line x1="100" y1="0" x2="150" y2="0"/>
+      <line x1="150" y1="0" x2="200" y2="0"/>
+      <line x1="0" y1="50" x2="50" y2="50"/>
+      <line x1="150" y1="50" x2="200" y2="50"/>
+      <line x1="0" y1="100" x2="50" y2="100"/>
+      <line x1="150" y1="100" x2="200" y2="100"/>
+      <line x1="0" y1="150" x2="50" y2="150"/>
+      <line x1="100" y1="150" x2="150" y2="150"/>
+      <line x1="150" y1="150" x2="200" y2="150"/>
+      <line x1="0" y1="0" x2="0" y2="50"/>
+      <line x1="0" y1="50" x2="0" y2="100"/>
+      <line x1="0" y1="100" x2="0" y2="150"/>
+      <line x1="0" y1="150" x2="0" y2="200"/>
+      <line x1="50" y1="0" x2="50" y2="50"/>
+      <line x1="50" y1="150" x2="50" y2="200"/>
+      <line x1="100" y1="0" x2="100" y2="50"/>
+      <line x1="100" y1="150" x2="100" y2="200"/>
+      <line x1="150" y1="0" x2="150" y2="50"/>
+      <line x1="150" y1="100" x2="150" y2="150"/>
+      <line x1="150" y1="150" x2="150" y2="200"/>
+      <line x1="200" y1="0" x2="200" y2="50"/>
+      <line x1="200" y1="50" x2="200" y2="100"/>
+      <line x1="200" y1="100" x2="200" y2="150"/>
+      <line x1="200" y1="150" x2="200" y2="200"/>
+      <line x1="0" y1="200" x2="50" y2="200"/>
+      <line x1="50" y1="200" x2="100" y2="200"/>
+      <line x1="100" y1="200" x2="150" y2="200"/>
+      <line x1="150" y1="200" x2="200" y2="200"/>
+    </g>
+    <!-- dots on top -->
+    <g fill="#0a0a0a">
+      <circle cx="0" cy="0" r="5"/><circle cx="50" cy="0" r="5"/><circle cx="100" cy="0" r="5"/><circle cx="150" cy="0" r="5"/><circle cx="200" cy="0" r="5"/>
+      <circle cx="0" cy="50" r="5"/><circle cx="50" cy="50" r="5"/><circle cx="100" cy="50" r="5"/><circle cx="150" cy="50" r="5"/><circle cx="200" cy="50" r="5"/>
+      <circle cx="0" cy="100" r="5"/><circle cx="50" cy="100" r="5"/><circle cx="100" cy="100" r="5"/><circle cx="150" cy="100" r="5"/><circle cx="200" cy="100" r="5"/>
+      <circle cx="0" cy="150" r="5"/><circle cx="50" cy="150" r="5"/><circle cx="100" cy="150" r="5"/><circle cx="150" cy="150" r="5"/><circle cx="200" cy="150" r="5"/>
+      <circle cx="0" cy="200" r="5"/><circle cx="50" cy="200" r="5"/><circle cx="100" cy="200" r="5"/><circle cx="150" cy="200" r="5"/><circle cx="200" cy="200" r="5"/>
+    </g>
+  </svg>
+
+  <div class="top">
+    <svg class="logo" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="8" width="24" height="24" fill="#06d6a0" rx="2"/>
+      <circle cx="8" cy="8" r="3.5" fill="#0a0a0a"/>
+      <circle cx="32" cy="8" r="3.5" fill="#0a0a0a"/>
+      <circle cx="8" cy="32" r="3.5" fill="#0a0a0a"/>
+      <circle cx="32" cy="32" r="3.5" fill="#0a0a0a"/>
+    </svg>
+    <span class="brand-text">Dots and Boxes</span>
+  </div>
+
+  <div>
+    <h1 class="headline">Play <span class="accent">online</span><br/>with friends.</h1>
+    <div class="sub">Real-time multiplayer for 2–4 players. No signup, just share a room link.</div>
+  </div>
+
+  <div class="bottom">
+    <div class="url">dotsandboxes.aeonic.earth</div>
+    <div class="tags">
+      <div class="tag accent-bg">Free</div>
+      <div class="tag">2–4 players</div>
+      <div class="tag">In-browser</div>
+    </div>
+  </div>
+</body>
+</html>

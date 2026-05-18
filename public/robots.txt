@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /room.html
+Disallow: /room
+
+Sitemap: https://dotsandboxes.aeonic.earth/sitemap.xml

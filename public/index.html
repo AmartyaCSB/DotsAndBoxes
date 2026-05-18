@@ -3,7 +3,28 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dots and Boxes</title>
+<title>Dots and Boxes — play online with friends</title>
+<meta name="description" content="Free online multiplayer Dots and Boxes. 2 to 4 players, no signup, just share a link. Play the classic pencil-and-paper game in your browser." />
+<meta name="theme-color" content="#06d6a0" />
+<link rel="canonical" href="https://dotsandboxes.aeonic.earth/" />
+
+<meta property="og:title" content="Dots and Boxes — play online with friends" />
+<meta property="og:description" content="Free real-time multiplayer Dots and Boxes. 2–4 players. No signup, just share a room link." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://dotsandboxes.aeonic.earth/" />
+<meta property="og:image" content="https://dotsandboxes.aeonic.earth/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:site_name" content="Dots and Boxes" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Dots and Boxes — play online with friends" />
+<meta name="twitter:description" content="Free real-time multiplayer Dots and Boxes. 2–4 players. No signup, just share a room link." />
+<meta name="twitter:image" content="https://dotsandboxes.aeonic.earth/og.png" />
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Game","name":"Dots and Boxes — Multiplayer","url":"https://dotsandboxes.aeonic.earth/","genre":"Puzzle","gamePlatform":"Web Browser","numberOfPlayers":"2-4","playMode":"MultiPlayer","applicationCategory":"Game","operatingSystem":"Any (Web)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
@@ -20,6 +41,11 @@
       <circle cx="32" cy="32" r="3.5" fill="currentColor"/>
     </svg>
     <span class="brand-text">Dots and Boxes</span>
+    <div class="stats-banner" aria-live="polite">
+      <div class="stat"><span class="stat-value" id="stat-live">—</span><span class="stat-label">live now</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-value" id="stat-total">—</span><span class="stat-label">games played</span></div>
+    </div>
     <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme">
       <svg class="icon-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
         <circle cx="10" cy="10" r="3.5"/>

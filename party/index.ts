@@ -119,6 +119,7 @@ export default class DotsAndBoxes implements Party.Server {
 
   async onAlarm() {
     const now = Date.now();
+    const prevPhase = this.state.phase;
     for (const conn of this.room.getConnections<ConnState>()) {
       const cs = conn.state;
       if (!cs) continue;
@@ -152,6 +153,13 @@ export default class DotsAndBoxes implements Party.Server {
       }
     } else {
       this.underpopulatedSince = null;
+    }
+
+    // Notify the stats party
+    if (this.state.phase === 'in_progress') {
+      void this.pingStats('heartbeat');
+    } else if (prevPhase === 'in_progress' && this.state.phase === 'finished') {
+      void this.pingStats('game_ended');
     }
 
     await this.room.storage.setAlarm(now + ALARM_PERIOD_MS);
@@ -222,6 +230,19 @@ export default class DotsAndBoxes implements Party.Server {
     this.broadcastState();
   }
 
+  private async pingStats(type: 'heartbeat' | 'game_ended') {
+    try {
+      const ctx = (this.room as any).context;
+      const stats = ctx?.parties?.stats?.get?.('counter');
+      if (!stats) return;
+      await stats.fetch({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ type, roomId: this.room.id }),
+      });
+    } catch { /* never let stats errors break gameplay */ }
+  }
+
   private handleStartGame(conn: Party.Connection<ConnState>, env: Envelope) {
     const me = this.findPlayer(conn);
     if (!me) return this.sendError(conn, ERROR_CODES.BAD_REQUEST, 'unknown player', env.reqId);
@@ -234,6 +255,7 @@ export default class DotsAndBoxes implements Party.Server {
     const config = this.sanitizeConfig(incoming);
     this.state = Game.startGame(this.state, config);
     this.broadcastState();
+    void this.pingStats('heartbeat');
   }
 
   private handleDrawEdge(conn: Party.Connection<ConnState>, env: Envelope) {
@@ -270,6 +292,7 @@ export default class DotsAndBoxes implements Party.Server {
         payload: { scores: this.state.scores, winnerSeats: this.state.winnerSeats },
       });
       this.broadcastState();
+      void this.pingStats('game_ended');
     }
   }
 
