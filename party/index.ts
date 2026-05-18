@@ -92,6 +92,7 @@ export default class DotsAndBoxes implements Party.Server {
         case 'start_game':   return this.handleStartGame(sender, env);
         case 'draw_edge':    return this.handleDrawEdge(sender, env);
         case 'leave':        return this.handleLeave(sender);
+        case 'request_rematch': return this.handleRequestRematch(sender, env);
         case 'ping':         return;
         default:             return this.sendError(sender, ERROR_CODES.BAD_REQUEST, `unknown type: ${env.type}`, env.reqId);
       }
@@ -296,6 +297,18 @@ export default class DotsAndBoxes implements Party.Server {
     }
   }
 
+  private handleRequestRematch(conn: Party.Connection<ConnState>, env: Envelope) {
+    if (this.state.phase !== 'finished') {
+      return this.sendError(conn, ERROR_CODES.BAD_REQUEST, 'game not finished', env.reqId);
+    }
+    const me = this.findPlayer(conn);
+    if (!me) return this.sendError(conn, ERROR_CODES.BAD_REQUEST, 'unknown player', env.reqId);
+    if (!this.state.rematchVotes.includes(me.id)) {
+      this.state.rematchVotes.push(me.id);
+      this.broadcastState();
+    }
+  }
+
   private handleLeave(conn: Party.Connection<ConnState>) {
     const idx = this.state.players.findIndex(p => p.id === conn.state?.playerId);
     if (idx < 0) return;
@@ -348,8 +361,12 @@ export default class DotsAndBoxes implements Party.Server {
   }
 
   private removePlayer(idx: number) {
+    const leavingId = this.state.players[idx]?.id;
     this.state.players.splice(idx, 1);
     this.state.scores.splice(idx, 1);
+    if (leavingId) {
+      this.state.rematchVotes = this.state.rematchVotes.filter(id => id !== leavingId);
+    }
     this.state.players.forEach((p, i) => {
       p.seatIdx = i;
       p.color = PALETTE[i % PALETTE.length];

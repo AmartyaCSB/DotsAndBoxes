@@ -37,6 +37,7 @@ export function createInitialState(config: GameConfig, players: PlayerProfile[] 
     totalEdges: totalEdgesFor(config),
     lastMove: null,
     winnerSeats: [],
+    rematchVotes: [],
   };
 }
 
@@ -48,6 +49,7 @@ export function startGame(state: GameState, config: GameConfig): GameState {
     players: state.players.map(p => ({ ...p })),
     scores: Array(state.players.length).fill(0),
     currentSeat: 0,
+    rematchVotes: [],
   };
 }
 

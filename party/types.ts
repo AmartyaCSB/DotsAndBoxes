@@ -45,6 +45,7 @@ export interface GameState {
   totalEdges: number;
   lastMove: Move | null;
   winnerSeats: number[];
+  rematchVotes: string[]; // playerIds who've requested a rematch (cleared on new game)
 }
 
 export interface Envelope<T = unknown> {

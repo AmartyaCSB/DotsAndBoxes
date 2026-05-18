@@ -118,6 +118,10 @@ export function startGame(config: { rows: number; cols: number; maxPlayers: numb
   send('start_game', { config });
 }
 
+export function requestRematch() {
+  send('request_rematch', {});
+}
+
 export function leave() {
   send('leave', {});
   location.href = '/';

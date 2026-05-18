@@ -18,6 +18,8 @@ let youPillEl: HTMLDivElement;
 let endgameEl: HTMLDivElement;
 let winnerBannerEl: HTMLDivElement;
 let playAgainBtn: HTMLButtonElement;
+let rematchBtn: HTMLButtonElement;
+let rematchNoticeEl: HTMLDivElement;
 
 let pending: Edge | null = null;
 let lastMoveEdge: Edge | null = null;
@@ -33,6 +35,12 @@ export function initBoard(h: BoardHandlers) {
   endgameEl = byId<HTMLDivElement>('endgame');
   winnerBannerEl = byId<HTMLDivElement>('winner-banner');
   playAgainBtn = byId<HTMLButtonElement>('play-again-btn');
+  rematchBtn = byId<HTMLButtonElement>('rematch-btn');
+  rematchNoticeEl = byId<HTMLDivElement>('rematch-notice');
+
+  rematchBtn.addEventListener('click', () => {
+    import('./client').then(c => c.requestRematch());
+  });
 
   byId<HTMLButtonElement>('leave-btn-game').addEventListener('click', () => {
     import('./client').then(c => c.leave());
@@ -298,8 +306,50 @@ function renderEndgame(state: GameState, me: PlayerProfile | null) {
   } else {
     winnerBannerEl.textContent = 'Game ended.';
   }
-  // "Play again" is host-only
-  playAgainBtn.hidden = !(me && me.isHost);
+
+  // Rematch flow: non-host can request; host sees notification + starts the game
+  const votes = state.rematchVotes || [];
+  const iAmHost = !!(me && me.isHost);
+  const iVoted = !!(me && votes.includes(me.id));
+  const otherVoters = votes
+    .filter(id => !me || id !== me.id)
+    .map(id => state.players.find(p => p.id === id)?.name)
+    .filter((n): n is string => !!n);
+
+  if (iAmHost) {
+    playAgainBtn.hidden = false;
+    rematchBtn.hidden = true;
+    if (otherVoters.length > 0) {
+      rematchNoticeEl.hidden = false;
+      rematchNoticeEl.textContent = otherVoters.length === 1
+        ? `${otherVoters[0]} wants a rematch`
+        : `${otherVoters.join(', ')} want a rematch`;
+    } else {
+      rematchNoticeEl.hidden = true;
+    }
+  } else {
+    playAgainBtn.hidden = true;
+    rematchBtn.hidden = false;
+    if (iVoted) {
+      rematchBtn.disabled = true;
+      rematchBtn.textContent = 'Waiting for host…';
+      rematchBtn.classList.remove('accent');
+      rematchBtn.classList.add('ghost');
+    } else {
+      rematchBtn.disabled = false;
+      rematchBtn.textContent = 'Request rematch';
+      rematchBtn.classList.add('accent');
+      rematchBtn.classList.remove('ghost');
+    }
+    if (otherVoters.length > 0) {
+      rematchNoticeEl.hidden = false;
+      rematchNoticeEl.textContent = otherVoters.length === 1
+        ? `${otherVoters[0]} also wants a rematch`
+        : `${otherVoters.join(', ')} also want a rematch`;
+    } else {
+      rematchNoticeEl.hidden = true;
+    }
+  }
 }
 
 function byId<T extends HTMLElement | SVGSVGElement>(id: string): T {
