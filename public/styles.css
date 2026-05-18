@@ -219,6 +219,89 @@ label.field {
 .landing-actions form input { flex: 1; text-transform: lowercase; }
 .error { color: var(--danger); font-size: 13px; margin-top: 6px; }
 
+/* How-to-play animated demo */
+.htp-anim {
+  display: block;
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  margin: 8px auto 18px;
+  color: var(--text);              /* feeds currentColor for dots + dashed grid */
+}
+.htp-anim .htp-moves line { stroke-width: 5; }
+.htp-anim .htp-box, .htp-anim .htp-moves line {
+  opacity: 0;
+  animation-duration: 12s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+.htp-anim .htp-b00 { transform-origin: 60px 60px; }
+.htp-anim .htp-b01 { transform-origin: 140px 60px; }
+.htp-anim .htp-b10 { transform-origin: 60px 140px; }
+.htp-anim .htp-b11 { transform-origin: 140px 140px; }
+
+/* Each line appears at its move %, holds, then fades for loop reset */
+.htp-anim .htp-m1  { animation-name: htp-m1; }
+.htp-anim .htp-m2  { animation-name: htp-m2; }
+.htp-anim .htp-m3  { animation-name: htp-m3; }
+.htp-anim .htp-m4  { animation-name: htp-m4; }
+.htp-anim .htp-m5  { animation-name: htp-m5; }
+.htp-anim .htp-m6  { animation-name: htp-m6; }
+.htp-anim .htp-m7  { animation-name: htp-m7; }
+.htp-anim .htp-m8  { animation-name: htp-m8; }
+.htp-anim .htp-m9  { animation-name: htp-m9; }
+.htp-anim .htp-m10 { animation-name: htp-m10; }
+.htp-anim .htp-m11 { animation-name: htp-m11; }
+.htp-anim .htp-m12 { animation-name: htp-m12; }
+.htp-anim .htp-b00 { animation-name: htp-b00; }
+.htp-anim .htp-b01 { animation-name: htp-b01; }
+.htp-anim .htp-b11 { animation-name: htp-b11; }
+.htp-anim .htp-b10 { animation-name: htp-b10; }
+
+@keyframes htp-m1  { 0%, 4%  {opacity:0} 5%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m2  { 0%, 9%  {opacity:0} 10%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m3  { 0%, 14% {opacity:0} 15%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m4  { 0%, 19% {opacity:0} 20%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m5  { 0%, 24% {opacity:0} 25%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m6  { 0%, 29% {opacity:0} 30%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m7  { 0%, 34% {opacity:0} 35%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m8  { 0%, 39% {opacity:0} 40%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m9  { 0%, 44% {opacity:0} 45%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m10 { 0%, 49% {opacity:0} 50%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m11 { 0%, 54% {opacity:0} 55%, 92% {opacity:1} 93%, 100% {opacity:0} }
+@keyframes htp-m12 { 0%, 59% {opacity:0} 60%, 92% {opacity:1} 93%, 100% {opacity:0} }
+
+/* Box reveals "pop" briefly when they close, then settle */
+@keyframes htp-b00 {
+  0%, 34% { opacity: 0; transform: scale(0.4); }
+  36% { opacity: 0.95; transform: scale(1.15); }
+  38%, 92% { opacity: 0.8; transform: scale(1); }
+  93%, 100% { opacity: 0; transform: scale(0.7); }
+}
+@keyframes htp-b01 {
+  0%, 44% { opacity: 0; transform: scale(0.4); }
+  46% { opacity: 0.95; transform: scale(1.15); }
+  48%, 92% { opacity: 0.8; transform: scale(1); }
+  93%, 100% { opacity: 0; transform: scale(0.7); }
+}
+@keyframes htp-b11 {
+  0%, 54% { opacity: 0; transform: scale(0.4); }
+  56% { opacity: 0.95; transform: scale(1.15); }
+  58%, 92% { opacity: 0.8; transform: scale(1); }
+  93%, 100% { opacity: 0; transform: scale(0.7); }
+}
+@keyframes htp-b10 {
+  0%, 59% { opacity: 0; transform: scale(0.4); }
+  61% { opacity: 0.95; transform: scale(1.15); }
+  63%, 92% { opacity: 0.8; transform: scale(1); }
+  93%, 100% { opacity: 0; transform: scale(0.7); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .htp-anim .htp-box, .htp-anim .htp-moves line { animation: none; opacity: 1; transform: none; }
+  .htp-anim .htp-box[class*="b"] { opacity: 0.8; }
+}
+
 /* How to play */
 .how-to-play ol {
   margin: 12px 0 0;
