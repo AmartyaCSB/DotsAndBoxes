@@ -174,6 +174,18 @@ label.field {
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .row.between { justify-content: space-between; }
 .spacer { flex: 1; }
+
+.name-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.name-row button { padding: 10px 22px; }
+@media (max-width: 480px) {
+  .name-row button { flex: 1; }
+}
 .muted { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin: 0; }
 
 /* Landing */

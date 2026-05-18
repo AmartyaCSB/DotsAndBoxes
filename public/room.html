@@ -48,11 +48,15 @@
       </div>
     </div>
 
-    <div class="row" style="margin-bottom: 12px;">
-      <label class="field" style="flex:1;">
+    <form id="name-form" class="name-row">
+      <label class="field" style="flex:1; min-width: 200px;">
         Your name
-        <input id="name-input" type="text" maxlength="20" placeholder="Pick a name" autocomplete="off" />
+        <input id="name-input" type="text" maxlength="20" placeholder="Pick a name" autocomplete="off" autocapitalize="words" enterkeyhint="done" />
       </label>
+      <button id="name-save-btn" class="accent" type="submit">Save</button>
+    </form>
+
+    <div class="row" style="margin-bottom: 16px;">
       <button id="copy-link-btn" class="ghost" type="button">Copy invite link</button>
       <button id="leave-btn" class="ghost" type="button">Leave</button>
     </div>

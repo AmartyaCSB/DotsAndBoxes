@@ -53,7 +53,7 @@ export interface Envelope<T = unknown> {
   reqId?: string;
 }
 
-export const PALETTE = ['#ef476f', '#06d6a0', '#ffd166', '#118ab2'] as const;
+export const PALETTE = ['#71cbb0', '#cf6d8b', '#bcb680', '#7981c3'] as const;
 
 export const DEFAULT_CONFIG: GameConfig = {
   rows: 5,

@@ -8,26 +8,33 @@ interface LobbyHandlers {
 }
 
 let handlers: LobbyHandlers;
+let nameFormEl: HTMLFormElement;
 let nameInputEl: HTMLInputElement;
+let nameSaveBtnEl: HTMLButtonElement;
 let hostPanelEl: HTMLDivElement;
 let playersListEl: HTMLDivElement;
 let startBtnEl: HTMLButtonElement;
 let lobbyRootEl: HTMLDivElement;
 let warningEl: HTMLDivElement;
+let savedName = '';
 
 export function initLobby(h: LobbyHandlers) {
   handlers = h;
   lobbyRootEl = byId<HTMLDivElement>('lobby');
+  nameFormEl = byId<HTMLFormElement>('name-form');
   nameInputEl = byId<HTMLInputElement>('name-input');
+  nameSaveBtnEl = byId<HTMLButtonElement>('name-save-btn');
   hostPanelEl = byId<HTMLDivElement>('host-panel');
   playersListEl = byId<HTMLDivElement>('players-list');
   startBtnEl = byId<HTMLButtonElement>('start-btn');
   warningEl = byId<HTMLDivElement>('lobby-warning');
 
-  nameInputEl.addEventListener('change', commitName);
-  nameInputEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); commitName(); nameInputEl.blur(); }
+  nameFormEl.addEventListener('submit', (e) => {
+    e.preventDefault();
+    commitName();
+    nameInputEl.blur();
   });
+  nameInputEl.addEventListener('input', refreshSaveBtn);
   byId<HTMLButtonElement>('copy-link-btn').addEventListener('click', () => handlers.copyInviteLink());
   byId<HTMLButtonElement>('leave-btn').addEventListener('click', () => handlers.leave());
 
@@ -37,11 +44,35 @@ export function initLobby(h: LobbyHandlers) {
     const maxPlayers = +byId<HTMLSelectElement>('cfg-max').value;
     handlers.startGame({ rows, cols, maxPlayers });
   });
+
+  refreshSaveBtn();
 }
 
 function commitName() {
   const n = nameInputEl.value.trim().slice(0, 20);
-  if (n) handlers.setMyName(n);
+  if (!n) return;
+  handlers.setMyName(n);
+}
+
+function refreshSaveBtn() {
+  const typed = nameInputEl.value.trim();
+  if (!typed) {
+    nameSaveBtnEl.disabled = true;
+    nameSaveBtnEl.textContent = 'Save';
+    nameSaveBtnEl.classList.add('accent');
+    return;
+  }
+  if (savedName && typed === savedName) {
+    nameSaveBtnEl.disabled = true;
+    nameSaveBtnEl.textContent = 'Saved';
+    nameSaveBtnEl.classList.remove('accent');
+    nameSaveBtnEl.classList.add('ghost');
+  } else {
+    nameSaveBtnEl.disabled = false;
+    nameSaveBtnEl.textContent = 'Save';
+    nameSaveBtnEl.classList.add('accent');
+    nameSaveBtnEl.classList.remove('ghost');
+  }
 }
 
 export function renderLobby(state: GameState, me: PlayerProfile | null) {
@@ -50,9 +81,11 @@ export function renderLobby(state: GameState, me: PlayerProfile | null) {
   if (!inLobby) return;
 
   // Name input — keep the stored value unless server already gave us a name
+  savedName = me?.name ?? '';
   if (me && me.name && nameInputEl.value !== me.name && document.activeElement !== nameInputEl) {
     nameInputEl.value = me.name;
   }
+  refreshSaveBtn();
 
   // Player list
   playersListEl.innerHTML = '';
