@@ -218,6 +218,25 @@ label.field {
 .landing-actions form { display: flex; gap: 8px; }
 .landing-actions form input { flex: 1; text-transform: lowercase; }
 .error { color: var(--danger); font-size: 13px; margin-top: 6px; }
+.solo-hint {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.45;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.solo-hint .dot-marker {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
 
 /* How-to-play animated demo */
 .htp-anim {

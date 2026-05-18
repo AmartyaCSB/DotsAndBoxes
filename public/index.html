@@ -61,8 +61,8 @@
   </div>
 
   <div class="panel narrow">
-    <h2>Play with friends</h2>
-    <p class="muted">Create a room and share the link, or join with a code.</p>
+    <h2>Play with friends — or a bot</h2>
+    <p class="muted">Create a room and share the link to play with friends — or add a bot from the lobby and start solo right away.</p>
     <div class="landing-actions" style="margin-top:16px;">
       <button id="create-btn" class="accent">Create new room</button>
       <div class="or">or</div>
@@ -71,6 +71,10 @@
         <button type="submit">Join</button>
       </form>
       <div id="join-error" class="error" hidden></div>
+      <div class="solo-hint">
+        <span class="dot-marker" aria-hidden="true"></span>
+        <span>No one to play with? <strong class="accent-text">Add a bot</strong> in the lobby after creating a room.</span>
+      </div>
     </div>
   </div>
 
@@ -128,6 +132,9 @@
       <li>A single line can close <strong>two boxes</strong> at once (the seam between two near-complete boxes).</li>
       <li>The game ends when every line is drawn. <strong>Most boxes wins</strong>; ties are fine.</li>
     </ol>
+    <p class="muted" style="margin-top:14px;">
+      Want to practice the rules first? Create a room and add a <strong class="accent-text">bot opponent</strong> — it plays a decent casual game.
+    </p>
   </div>
 
   <script type="module" src="/dist/landing.js"></script>
