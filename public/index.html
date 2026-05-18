@@ -4,23 +4,46 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dots and Boxes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <h1>Dots and Boxes</h1>
+  <div class="brand">
+    <svg viewBox="0 0 40 40" class="brand-logo" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="8" y="8" width="24" height="24" fill="#06d6a0" rx="2"/>
+      <circle cx="8" cy="8" r="3.5" fill="#0a0a0a"/>
+      <circle cx="32" cy="8" r="3.5" fill="#0a0a0a"/>
+      <circle cx="8" cy="32" r="3.5" fill="#0a0a0a"/>
+      <circle cx="32" cy="32" r="3.5" fill="#0a0a0a"/>
+    </svg>
+    <span class="brand-text">Dots and Boxes</span>
+  </div>
 
   <div class="panel narrow">
     <h2>Play with friends</h2>
-    <p class="muted">Create a room and share the link, or join an existing one.</p>
-    <div class="landing-actions">
-      <button id="create-btn">Create new room</button>
-      <div class="or">— OR —</div>
+    <p class="muted">Create a room and share the link, or join with a code.</p>
+    <div class="landing-actions" style="margin-top:16px;">
+      <button id="create-btn" class="accent">Create new room</button>
+      <div class="or">or</div>
       <form id="join-form">
         <input id="join-input" type="text" inputmode="latin" autocomplete="off" placeholder="room code (6 chars)" maxlength="6" />
         <button type="submit">Join</button>
       </form>
       <div id="join-error" class="error" hidden></div>
     </div>
+  </div>
+
+  <div class="panel narrow how-to-play">
+    <h2>How to play</h2>
+    <ol>
+      <li>Players take turns drawing one <strong>line</strong> between two adjacent dots.</li>
+      <li>Completing the <strong>4th side of a box</strong> claims that box for you.</li>
+      <li>Claiming a box grants you <span class="accent-text"><strong>another turn</strong></span> — chain them to score fast.</li>
+      <li>A single line can close <strong>two boxes</strong> at once (the seam between two near-complete boxes).</li>
+      <li>The game ends when every line is drawn. <strong>Most boxes wins</strong>; ties are fine.</li>
+    </ol>
   </div>
 
   <script type="module" src="/dist/landing.js"></script>

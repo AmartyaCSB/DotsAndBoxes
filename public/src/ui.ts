@@ -20,8 +20,7 @@ let winnerBannerEl: HTMLDivElement;
 let playAgainBtn: HTMLButtonElement;
 
 let pending: Edge | null = null;
-let recentEdge: Edge | null = null;
-let recentTimer: ReturnType<typeof setTimeout> | null = null;
+let lastMoveEdge: Edge | null = null;
 
 export function initBoard(h: BoardHandlers) {
   handlers = h;
@@ -77,14 +76,8 @@ export function applyMoveLocal(
   else vEdges[move.edge.row][move.edge.col] = drawerSeat;
   for (const [r, c] of move.boxesCompleted) boxes[r][c] = drawerSeat;
 
-  // Trigger the recent-move highlight. We clear the .recent class directly
-  // after the animation so we don't re-render with stale state.
-  recentEdge = move.edge;
-  if (recentTimer) clearTimeout(recentTimer);
-  recentTimer = setTimeout(() => {
-    recentEdge = null;
-    boardEl.querySelectorAll('.line.recent').forEach(l => l.classList.remove('recent'));
-  }, 1100);
+  // Persistent last-move marker — stays until the next move replaces it.
+  lastMoveEdge = move.edge;
 
   return {
     ...state,
@@ -188,7 +181,7 @@ function renderSvg(state: GameState, me: PlayerProfile | null) {
   const makeLine = (edge: Edge, x1: number, y1: number, x2: number, y2: number) => {
     const drawn = (edge.orientation === 'h' ? state.hEdges : state.vEdges)[edge.row][edge.col] >= 0;
     const isPending = !!pending && pending.orientation === edge.orientation && pending.row === edge.row && pending.col === edge.col;
-    const isRecent = !!recentEdge && recentEdge.orientation === edge.orientation && recentEdge.row === edge.row && recentEdge.col === edge.col;
+    const isLastMove = !!lastMoveEdge && lastMoveEdge.orientation === edge.orientation && lastMoveEdge.row === edge.row && lastMoveEdge.col === edge.col;
     const locked = !myTurn || drawn || isPending;
 
     const g = document.createElementNS(SVGNS, 'g');
@@ -200,7 +193,7 @@ function renderSvg(state: GameState, me: PlayerProfile | null) {
     const cls = ['line'];
     if (drawn) cls.push('drawn');
     if (isPending) cls.push('pending');
-    if (isRecent && drawn) cls.push('recent');
+    if (isLastMove && drawn) cls.push('last-move');
     visible.setAttribute('class', cls.join(' '));
     visible.setAttribute('x1', String(x1));
     visible.setAttribute('y1', String(y1));

@@ -176,6 +176,20 @@ export function showToast(msg: string) {
   toastTimer = setTimeout(() => el!.classList.remove('show'), 2400);
 }
 
+// Populate room-code badges + wire copy buttons
+const codeUpper = roomId!.toUpperCase();
+document.querySelectorAll<HTMLElement>('.room-code-text').forEach(el => {
+  el.textContent = codeUpper;
+});
+document.querySelectorAll<HTMLButtonElement>('[data-copy-code]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    navigator.clipboard.writeText(codeUpper).then(
+      () => showToast('Room code copied'),
+      () => showToast('Copy failed — long-press to copy'),
+    );
+  });
+});
+
 // Boot the UI shells
 initLobby({ setMyName, startGame, copyInviteLink, leave });
 initBoard({ tryDrawEdge });

@@ -4,15 +4,35 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Dots and Boxes — Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <h1>Dots and Boxes</h1>
+  <div class="brand">
+    <svg viewBox="0 0 40 40" class="brand-logo" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="8" y="8" width="24" height="24" fill="#06d6a0" rx="2"/>
+      <circle cx="8" cy="8" r="3.5" fill="#0a0a0a"/>
+      <circle cx="32" cy="8" r="3.5" fill="#0a0a0a"/>
+      <circle cx="8" cy="32" r="3.5" fill="#0a0a0a"/>
+      <circle cx="32" cy="32" r="3.5" fill="#0a0a0a"/>
+    </svg>
+    <span class="brand-text">Dots and Boxes</span>
+  </div>
+
   <div id="connection-status">Connecting…</div>
 
   <!-- Lobby panel (visible while phase === 'lobby') -->
   <div id="lobby" class="panel">
-    <h2>Lobby</h2>
+    <div class="row between" style="margin-bottom: 16px;">
+      <h2 style="margin:0;">Lobby</h2>
+      <div class="room-code-badge" data-room-code-badge>
+        Room <code class="room-code-text">—</code>
+        <button class="room-code-copy" data-copy-code type="button" aria-label="Copy room code">Copy</button>
+      </div>
+    </div>
+
     <div class="row" style="margin-bottom: 12px;">
       <label class="field" style="flex:1;">
         Your name
@@ -22,11 +42,11 @@
       <button id="leave-btn" class="ghost" type="button">Leave</button>
     </div>
 
-    <h2 style="margin-top:16px;">Players</h2>
+    <h2 style="margin-top:8px; margin-bottom: 8px; font-size: 16px;">Players</h2>
     <div id="players-list"></div>
 
     <div id="host-panel" hidden style="margin-top: 16px;">
-      <h2>Game setup (host)</h2>
+      <h2 style="margin-bottom: 8px; font-size: 16px;">Game setup (host)</h2>
       <div class="row">
         <label class="field">
           Grid
@@ -47,7 +67,7 @@
           </select>
         </label>
         <div class="spacer"></div>
-        <button id="start-btn" type="button">Start game</button>
+        <button id="start-btn" class="accent" type="button">Start game</button>
       </div>
     </div>
 
@@ -58,7 +78,13 @@
   <div id="game" class="panel" hidden>
     <div class="row between" style="margin-bottom:12px;">
       <div id="you-pill" class="muted"></div>
-      <button id="leave-btn-game" class="ghost" type="button">Leave</button>
+      <div class="row" style="gap:8px;">
+        <div class="room-code-badge" data-room-code-badge>
+          Room <code class="room-code-text">—</code>
+          <button class="room-code-copy" data-copy-code type="button" aria-label="Copy room code">Copy</button>
+        </div>
+        <button id="leave-btn-game" class="ghost" type="button">Leave</button>
+      </div>
     </div>
     <div id="scoreboard" class="scoreboard"></div>
   </div>
@@ -71,7 +97,7 @@
   <div id="endgame" class="panel narrow" hidden style="text-align:center;">
     <div id="winner-banner" class="winner-banner"></div>
     <div class="row" style="justify-content:center; margin-top:14px;">
-      <button id="play-again-btn" type="button" hidden>Play again</button>
+      <button id="play-again-btn" class="accent" type="button" hidden>Play again</button>
       <button id="back-home-btn" class="ghost" type="button">Back to home</button>
     </div>
   </div>
