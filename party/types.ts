@@ -14,6 +14,7 @@ export interface PlayerProfile {
   connected: boolean;
   isHost: boolean;
   lastSeenAt: number;
+  isBot?: boolean;
 }
 
 export interface Move {

@@ -122,6 +122,14 @@ export function requestRematch() {
   send('request_rematch', {});
 }
 
+export function addBot() {
+  send('add_bot', {});
+}
+
+export function removeBot(botId: string) {
+  send('remove_bot', { botId });
+}
+
 export function leave() {
   send('leave', {});
   location.href = '/';
@@ -132,8 +140,9 @@ export function tryDrawEdge(edge: { orientation: 'h' | 'v'; row: number; col: nu
   if (ctx.state.phase !== 'in_progress') return;
   if (ctx.state.currentSeat !== ctx.me.seatIdx) return;
   if (ctx.pendingEdge) return;
-  const connectedCount = ctx.state.players.filter(p => p.connected).length;
-  if (connectedCount < 2) {
+  const humanCount = ctx.state.players.filter(p => p.connected && !p.isBot).length;
+  const totalActive = ctx.state.players.filter(p => p.connected).length;
+  if (humanCount < 1 || totalActive < 2) {
     showToast('Waiting for another player');
     return;
   }
@@ -208,5 +217,5 @@ document.querySelectorAll<HTMLButtonElement>('[data-copy-code]').forEach(btn => 
 });
 
 // Boot the UI shells
-initLobby({ setMyName, startGame, copyInviteLink, leave });
+initLobby({ setMyName, startGame, copyInviteLink, leave, addBot, removeBot });
 initBoard({ tryDrawEdge });

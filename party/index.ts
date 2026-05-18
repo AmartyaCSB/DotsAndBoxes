@@ -93,6 +93,8 @@ export default class DotsAndBoxes implements Party.Server {
         case 'draw_edge':    return this.handleDrawEdge(sender, env);
         case 'leave':        return this.handleLeave(sender);
         case 'request_rematch': return this.handleRequestRematch(sender, env);
+        case 'add_bot':      return this.handleAddBot(sender, env);
+        case 'remove_bot':   return this.handleRemoveBot(sender, env);
         case 'ping':         return;
         default:             return this.sendError(sender, ERROR_CODES.BAD_REQUEST, `unknown type: ${env.type}`, env.reqId);
       }
@@ -139,10 +141,10 @@ export default class DotsAndBoxes implements Party.Server {
       this.emptySince = null;
     }
 
-    // Auto-finish in-progress games that drop below 2 connected players for 2 min
+    // Auto-finish in-progress games that drop below 1 connected human for 2 min
     if (this.state.phase === 'in_progress') {
-      const connected = this.state.players.filter(p => p.connected).length;
-      if (connected < 2) {
+      const connectedHumans = this.state.players.filter(p => p.connected && !p.isBot).length;
+      if (connectedHumans < 1) {
         if (!this.underpopulatedSince) this.underpopulatedSince = now;
         if (now - this.underpopulatedSince > UNDERPOPULATED_FINISH_MS) {
           this.state = { ...this.state, phase: 'finished', winnerSeats: Game.computeWinners(this.state) };
@@ -231,6 +233,49 @@ export default class DotsAndBoxes implements Party.Server {
     this.broadcastState();
   }
 
+  private botTurnScheduled = false;
+  private scheduleBotTurnIfNeeded() {
+    if (this.state.phase !== 'in_progress' || this.botTurnScheduled) return;
+    const cur = this.state.players[this.state.currentSeat];
+    if (!cur?.isBot) return;
+    this.botTurnScheduled = true;
+    setTimeout(() => this.runBotTurns(), 600);
+  }
+
+  private async runBotTurns() {
+    this.botTurnScheduled = false;
+    while (this.state.phase === 'in_progress') {
+      const cur = this.state.players[this.state.currentSeat];
+      if (!cur?.isBot) break;
+      const edge = Game.pickBotMove(this.state);
+      if (!edge) break;
+      const result = Game.applyMove(this.state, edge, cur.id, Date.now());
+      if ('error' in result) break;
+      this.state = result.state;
+      const phase = this.state.phase;
+      this.broadcast({
+        type: 'move',
+        payload: {
+          move: result.move,
+          currentSeat: this.state.currentSeat,
+          scores: this.state.scores,
+          phase,
+        },
+      });
+      if (phase === 'finished') {
+        this.broadcast({
+          type: 'game_over',
+          payload: { scores: this.state.scores, winnerSeats: this.state.winnerSeats },
+        });
+        this.broadcastState();
+        void this.pingStats('game_ended');
+        break;
+      }
+      // small pause between consecutive bot moves so chains are watchable
+      await new Promise(r => setTimeout(r, 600));
+    }
+  }
+
   private async pingStats(type: 'heartbeat' | 'game_ended') {
     try {
       const ctx = (this.room as any).context;
@@ -257,6 +302,7 @@ export default class DotsAndBoxes implements Party.Server {
     this.state = Game.startGame(this.state, config);
     this.broadcastState();
     void this.pingStats('heartbeat');
+    this.scheduleBotTurnIfNeeded();
   }
 
   private handleDrawEdge(conn: Party.Connection<ConnState>, env: Envelope) {
@@ -267,8 +313,10 @@ export default class DotsAndBoxes implements Party.Server {
         typeof edge.row !== 'number' || typeof edge.col !== 'number') {
       return this.sendError(conn, ERROR_CODES.INVALID_EDGE, 'malformed edge', env.reqId);
     }
-    const connectedCount = this.state.players.filter(p => p.connected).length;
-    if (connectedCount < 2) {
+    const humanCount = this.state.players.filter(p => p.connected && !p.isBot).length;
+    const totalActive = this.state.players.filter(p => p.connected).length;
+    // Need at least one human and a total of 2 active participants (bots count toward the latter).
+    if (humanCount < 1 || totalActive < 2) {
       return this.sendError(conn, ERROR_CODES.NOT_IN_GAME, 'Waiting for another player to join', env.reqId);
     }
     this.state = Game.advancePastAfk(this.state);
@@ -294,7 +342,46 @@ export default class DotsAndBoxes implements Party.Server {
       });
       this.broadcastState();
       void this.pingStats('game_ended');
+    } else {
+      this.scheduleBotTurnIfNeeded();
     }
+  }
+
+  private handleAddBot(conn: Party.Connection<ConnState>, env: Envelope) {
+    const me = this.findPlayer(conn);
+    if (!me) return this.sendError(conn, ERROR_CODES.BAD_REQUEST, 'unknown player', env.reqId);
+    if (!me.isHost) return this.sendError(conn, ERROR_CODES.NOT_HOST, 'only host can add a bot', env.reqId);
+    if (this.state.phase !== 'lobby') return this.sendError(conn, ERROR_CODES.NOT_IN_LOBBY, 'add bots in lobby only', env.reqId);
+    if (this.state.players.length >= this.state.config.maxPlayers) {
+      return this.sendError(conn, ERROR_CODES.ROOM_FULL, 'lobby full', env.reqId);
+    }
+    const seatIdx = this.state.players.length;
+    const botCount = this.state.players.filter(p => p.isBot).length + 1;
+    const profile: PlayerProfile = {
+      id: 'bot-' + Math.random().toString(36).slice(2, 10),
+      name: `Bot ${botCount}`,
+      color: PALETTE[seatIdx % PALETTE.length],
+      seatIdx,
+      connected: true,
+      isHost: false,
+      lastSeenAt: Date.now(),
+      isBot: true,
+    };
+    this.state.players.push(profile);
+    this.state.scores.push(0);
+    this.broadcastState();
+  }
+
+  private handleRemoveBot(conn: Party.Connection<ConnState>, env: Envelope) {
+    const me = this.findPlayer(conn);
+    if (!me) return this.sendError(conn, ERROR_CODES.BAD_REQUEST, 'unknown player', env.reqId);
+    if (!me.isHost) return this.sendError(conn, ERROR_CODES.NOT_HOST, 'only host can remove a bot', env.reqId);
+    if (this.state.phase !== 'lobby') return this.sendError(conn, ERROR_CODES.NOT_IN_LOBBY, 'remove bots in lobby only', env.reqId);
+    const botId = (env.payload as { botId?: string })?.botId;
+    const idx = this.state.players.findIndex(p => p.id === botId && p.isBot);
+    if (idx < 0) return;
+    this.removePlayer(idx);
+    this.broadcastState();
   }
 
   private handleRequestRematch(conn: Party.Connection<ConnState>, env: Envelope) {

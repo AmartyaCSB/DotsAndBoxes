@@ -190,6 +190,80 @@ export function computeWinners(state: GameState): number[] {
     .filter(i => i >= 0);
 }
 
+// -------------- Bot AI --------------
+// Greedy heuristic:
+//  1. If any empty edge closes one or more boxes, pick the one closing the most.
+//  2. Otherwise, prefer edges that DON'T leave any box with 3 sides drawn
+//     (i.e. don't hand a free box to the opponent).
+//  3. If forced to give one away, pick the edge that opens the fewest boxes.
+export function pickBotMove(state: GameState): Edge | null {
+  const empty: Edge[] = [];
+  const { rows, cols } = state.config;
+  for (let r = 0; r <= rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (state.hEdges[r][c] < 0) empty.push({ orientation: 'h', row: r, col: c });
+    }
+  }
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c <= cols; c++) {
+      if (state.vEdges[r][c] < 0) empty.push({ orientation: 'v', row: r, col: c });
+    }
+  }
+  if (empty.length === 0) return null;
+
+  // 1. Edges that complete boxes — sort by how many they close
+  const completers = empty
+    .map(e => ({ edge: e, closes: countClosesAfter(state, e) }))
+    .filter(x => x.closes > 0)
+    .sort((a, b) => b.closes - a.closes);
+  if (completers.length > 0) return completers[0].edge;
+
+  // 2. Safe edges — don't create a 3-sided box anywhere
+  const safe = empty.filter(e => countThreeSidedAfter(state, e) === 0);
+  if (safe.length > 0) return safe[Math.floor(Math.random() * safe.length)];
+
+  // 3. Forced give-away — minimize the number of 3-sided boxes we create
+  const sorted = empty
+    .map(e => ({ edge: e, opens: countThreeSidedAfter(state, e) }))
+    .sort((a, b) => a.opens - b.opens);
+  return sorted[0].edge;
+}
+
+function sideCount(hEdges: number[][], vEdges: number[][], br: number, bc: number): number {
+  return (
+    (hEdges[br][bc] >= 0 ? 1 : 0) +
+    (hEdges[br + 1][bc] >= 0 ? 1 : 0) +
+    (vEdges[br][bc] >= 0 ? 1 : 0) +
+    (vEdges[br][bc + 1] >= 0 ? 1 : 0)
+  );
+}
+
+function countClosesAfter(state: GameState, edge: Edge): number {
+  const h = state.hEdges, v = state.vEdges;
+  const hVal = (r: number, c: number) => (edge.orientation === 'h' && edge.row === r && edge.col === c) ? 0 : h[r][c];
+  const vVal = (r: number, c: number) => (edge.orientation === 'v' && edge.row === r && edge.col === c) ? 0 : v[r][c];
+  let count = 0;
+  for (const [br, bc] of adjacentBoxes(state, edge)) {
+    if (hVal(br, bc) >= 0 && hVal(br + 1, bc) >= 0 && vVal(br, bc) >= 0 && vVal(br, bc + 1) >= 0) {
+      count++;
+    }
+  }
+  return count;
+}
+
+function countThreeSidedAfter(state: GameState, edge: Edge): number {
+  // Clone to simulate drawing the edge, then count boxes that end up with exactly 3 sides.
+  const h = state.hEdges.map(row => row.slice());
+  const v = state.vEdges.map(row => row.slice());
+  if (edge.orientation === 'h') h[edge.row][edge.col] = 0;
+  else v[edge.row][edge.col] = 0;
+  let count = 0;
+  for (const [br, bc] of adjacentBoxes(state, edge)) {
+    if (sideCount(h, v, br, bc) === 3) count++;
+  }
+  return count;
+}
+
 export function advancePastAfk(state: GameState): GameState {
   if (state.phase !== 'in_progress') return state;
   const cur = state.players[state.currentSeat];

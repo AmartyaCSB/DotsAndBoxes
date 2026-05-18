@@ -5,6 +5,8 @@ interface LobbyHandlers {
   startGame: (config: { rows: number; cols: number; maxPlayers: number }) => void;
   copyInviteLink: () => void;
   leave: () => void;
+  addBot: () => void;
+  removeBot: (botId: string) => void;
 }
 
 let handlers: LobbyHandlers;
@@ -14,6 +16,7 @@ let nameSaveBtnEl: HTMLButtonElement;
 let hostPanelEl: HTMLDivElement;
 let playersListEl: HTMLDivElement;
 let startBtnEl: HTMLButtonElement;
+let addBotBtnEl: HTMLButtonElement;
 let lobbyRootEl: HTMLDivElement;
 let warningEl: HTMLDivElement;
 let savedName = '';
@@ -27,7 +30,18 @@ export function initLobby(h: LobbyHandlers) {
   hostPanelEl = byId<HTMLDivElement>('host-panel');
   playersListEl = byId<HTMLDivElement>('players-list');
   startBtnEl = byId<HTMLButtonElement>('start-btn');
+  addBotBtnEl = byId<HTMLButtonElement>('add-bot-btn');
   warningEl = byId<HTMLDivElement>('lobby-warning');
+
+  addBotBtnEl.addEventListener('click', () => handlers.addBot());
+  playersListEl.addEventListener('click', (e) => {
+    const t = e.target as HTMLElement;
+    const btn = t.closest<HTMLButtonElement>('button[data-remove-bot]');
+    if (btn) {
+      const id = btn.getAttribute('data-remove-bot');
+      if (id) handlers.removeBot(id);
+    }
+  });
 
   nameFormEl.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -88,31 +102,42 @@ export function renderLobby(state: GameState, me: PlayerProfile | null) {
   refreshSaveBtn();
 
   // Player list
+  const iAmHost = !!(me && me.isHost);
   playersListEl.innerHTML = '';
   state.players.forEach(p => {
     const row = document.createElement('div');
     row.className = 'player-row';
+    const removeBtn = (iAmHost && p.isBot)
+      ? `<button class="link-btn" data-remove-bot="${escapeHtml(p.id)}" aria-label="Remove ${escapeHtml(p.name)}">×</button>`
+      : '';
     row.innerHTML = `
       <span class="swatch" style="background:${p.color}"></span>
       <span class="player-row-name">${escapeHtml(p.name || '(naming…)')}</span>
+      ${p.isBot ? '<span class="badge accent-badge">bot</span>' : ''}
       ${p.isHost ? '<span class="badge">host</span>' : ''}
       ${me && p.id === me.id ? '<span class="badge muted">you</span>' : ''}
+      ${removeBtn}
     `;
     playersListEl.appendChild(row);
   });
 
   // Host panel visibility
-  const iAmHost = !!(me && me.isHost);
   hostPanelEl.hidden = !iAmHost;
 
-  const namedCount = state.players.filter(p => !!p.name).length;
-  const canStart = state.players.length >= 2 && namedCount === state.players.length;
+  // Add-bot button: enabled when there's room (bots don't need names)
+  const room = state.config.maxPlayers;
+  addBotBtnEl.disabled = state.players.length >= room;
+
+  // Bots count toward the minimum and don't need a name
+  const namedHumans = state.players.filter(p => !p.isBot && !!p.name).length;
+  const totalHumans = state.players.filter(p => !p.isBot).length;
+  const canStart = state.players.length >= 2 && namedHumans === totalHumans && totalHumans >= 1;
   startBtnEl.disabled = !canStart;
 
   if (state.players.length < 2) {
     warningEl.hidden = false;
-    warningEl.textContent = 'Share the invite link — at least 2 players needed.';
-  } else if (namedCount < state.players.length) {
+    warningEl.textContent = 'Share the invite link — or add a bot to play right now.';
+  } else if (namedHumans < totalHumans) {
     warningEl.hidden = false;
     warningEl.textContent = 'Waiting on all players to choose a name…';
   } else {
