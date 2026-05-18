@@ -12,7 +12,15 @@ import { DEFAULT_CONFIG, ERROR_CODES, PALETTE } from './types';
 interface ConnState {
   playerId: string;
   lastSeenAt: number;
+  tokens: number;       // current bucket level
+  tokensRefilledAt: number;  // last refill timestamp
+  violations: number;   // count of times this conn hit the limit
 }
+
+// Token bucket: 30 burst, refills at 10/sec (one token per 100ms).
+const BUCKET_MAX = 30;
+const BUCKET_REFILL_PER_MS = 10 / 1000; // 0.01 tokens/ms
+const MAX_VIOLATIONS_BEFORE_KICK = 5;
 
 const GRACE_MS = 90_000;
 const STALE_MS = 90_000;
@@ -55,11 +63,21 @@ export default class DotsAndBoxes implements Party.Server {
   }
 
   onConnect(conn: Party.Connection<ConnState>) {
-    conn.setState({ playerId: '', lastSeenAt: Date.now() });
+    conn.setState({
+      playerId: '',
+      lastSeenAt: Date.now(),
+      tokens: BUCKET_MAX,
+      tokensRefilledAt: Date.now(),
+      violations: 0,
+    });
     this.emptySince = null;
   }
 
   onMessage(raw: string, sender: Party.Connection<ConnState>) {
+    if (!this.consumeToken(sender)) return;  // dropped due to rate limit
+    if (typeof raw === 'string' && raw.length > 4096) {
+      return this.sendError(sender, ERROR_CODES.BAD_REQUEST, 'message too large');
+    }
     let env: Envelope;
     try {
       env = JSON.parse(raw);
@@ -269,6 +287,29 @@ export default class DotsAndBoxes implements Party.Server {
   }
 
   // ---------- Helpers ----------
+
+  // Token-bucket rate limit. Returns false if the conn is over budget — in
+  // that case the message is dropped (and the conn closed after repeat abuse).
+  private consumeToken(conn: Party.Connection<ConnState>): boolean {
+    const cs = conn.state;
+    if (!cs) return true;
+    const now = Date.now();
+    const refilled = Math.min(
+      BUCKET_MAX,
+      cs.tokens + (now - cs.tokensRefilledAt) * BUCKET_REFILL_PER_MS,
+    );
+    if (refilled < 1) {
+      const violations = cs.violations + 1;
+      conn.setState({ ...cs, tokens: refilled, tokensRefilledAt: now, violations });
+      this.sendError(conn, ERROR_CODES.BAD_REQUEST, 'rate limit exceeded');
+      if (violations >= MAX_VIOLATIONS_BEFORE_KICK) {
+        try { conn.close(1008, 'rate limit'); } catch { /* ignore */ }
+      }
+      return false;
+    }
+    conn.setState({ ...cs, tokens: refilled - 1, tokensRefilledAt: now });
+    return true;
+  }
 
   private touchConn(conn: Party.Connection<ConnState>) {
     const cs = conn.state;

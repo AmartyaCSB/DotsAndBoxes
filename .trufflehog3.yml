@@ -1,0 +1,17 @@
+severity: MEDIUM
+exclude:
+  - message: dependency code
+    paths:
+      - node_modules/.*
+  - message: build output
+    paths:
+      - public/dist/.*
+  - message: git internals
+    paths:
+      - \.git/.*
+  - message: lockfile
+    paths:
+      - package-lock\.json
+  - message: scan baseline
+    paths:
+      - \.trufflehog-baseline\.json
