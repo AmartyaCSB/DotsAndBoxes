@@ -258,18 +258,21 @@ label.field {
 .htp-anim .htp-b11 { animation-name: htp-b11; }
 .htp-anim .htp-b10 { animation-name: htp-b10; }
 
-@keyframes htp-m1  { 0%, 4%  {opacity:0} 5%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m2  { 0%, 9%  {opacity:0} 10%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m3  { 0%, 14% {opacity:0} 15%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m4  { 0%, 19% {opacity:0} 20%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m5  { 0%, 24% {opacity:0} 25%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m6  { 0%, 29% {opacity:0} 30%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m7  { 0%, 34% {opacity:0} 35%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m8  { 0%, 39% {opacity:0} 40%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m9  { 0%, 44% {opacity:0} 45%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m10 { 0%, 49% {opacity:0} 50%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m11 { 0%, 54% {opacity:0} 55%, 92% {opacity:1} 93%, 100% {opacity:0} }
-@keyframes htp-m12 { 0%, 59% {opacity:0} 60%, 92% {opacity:1} 93%, 100% {opacity:0} }
+/* Each move: appears in accent (last-move highlight), then switches to drawn
+   color the moment the next move appears. m12 stays highlighted (it's the
+   final last-move) until the loop fades out. */
+@keyframes htp-m1  { 0%, 4%  {opacity:0; stroke: var(--line-last)} 5%, 9%   {opacity:1; stroke: var(--line-last)} 10%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m2  { 0%, 9%  {opacity:0; stroke: var(--line-last)} 10%, 14% {opacity:1; stroke: var(--line-last)} 15%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m3  { 0%, 14% {opacity:0; stroke: var(--line-last)} 15%, 19% {opacity:1; stroke: var(--line-last)} 20%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m4  { 0%, 19% {opacity:0; stroke: var(--line-last)} 20%, 24% {opacity:1; stroke: var(--line-last)} 25%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m5  { 0%, 24% {opacity:0; stroke: var(--line-last)} 25%, 29% {opacity:1; stroke: var(--line-last)} 30%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m6  { 0%, 29% {opacity:0; stroke: var(--line-last)} 30%, 34% {opacity:1; stroke: var(--line-last)} 35%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m7  { 0%, 34% {opacity:0; stroke: var(--line-last)} 35%, 39% {opacity:1; stroke: var(--line-last)} 40%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m8  { 0%, 39% {opacity:0; stroke: var(--line-last)} 40%, 44% {opacity:1; stroke: var(--line-last)} 45%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m9  { 0%, 44% {opacity:0; stroke: var(--line-last)} 45%, 49% {opacity:1; stroke: var(--line-last)} 50%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m10 { 0%, 49% {opacity:0; stroke: var(--line-last)} 50%, 54% {opacity:1; stroke: var(--line-last)} 55%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m11 { 0%, 54% {opacity:0; stroke: var(--line-last)} 55%, 59% {opacity:1; stroke: var(--line-last)} 60%, 92% {opacity:1; stroke: var(--line-drawn)} 93%, 100% {opacity:0; stroke: var(--line-drawn)} }
+@keyframes htp-m12 { 0%, 59% {opacity:0; stroke: var(--line-last)} 60%, 92% {opacity:1; stroke: var(--line-last)} 93%, 100% {opacity:0; stroke: var(--line-last)} }
 
 /* Box reveals "pop" briefly when they close, then settle */
 @keyframes htp-b00 {
@@ -298,8 +301,9 @@ label.field {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .htp-anim .htp-box, .htp-anim .htp-moves line { animation: none; opacity: 1; transform: none; }
-  .htp-anim .htp-box[class*="b"] { opacity: 0.8; }
+  .htp-anim .htp-moves line { animation: none; opacity: 1; stroke: var(--line-drawn); }
+  .htp-anim .htp-m12 { stroke: var(--line-last); }
+  .htp-anim .htp-box { animation: none; opacity: 0.8; transform: none; }
 }
 
 /* How to play */
