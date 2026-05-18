@@ -16,12 +16,14 @@ interface ConnState {
 
 const GRACE_MS = 90_000;
 const STALE_MS = 90_000;
-const ALARM_PERIOD_MS = 60_000;
-const EMPTY_FINISH_MS = 5 * 60_000;
+const ALARM_PERIOD_MS = 30_000;
+const EMPTY_FINISH_MS = 2 * 60_000;
+const UNDERPOPULATED_FINISH_MS = 2 * 60_000;
 
 export default class DotsAndBoxes implements Party.Server {
   state: GameState = Game.createInitialState(DEFAULT_CONFIG);
   emptySince: number | null = null;
+  underpopulatedSince: number | null = null;
 
   constructor(readonly room: Party.Room) {}
 
@@ -88,10 +90,29 @@ export default class DotsAndBoxes implements Party.Server {
       if (!this.emptySince) this.emptySince = now;
       if (this.state.phase === 'in_progress' && now - this.emptySince > EMPTY_FINISH_MS) {
         this.state = { ...this.state, phase: 'finished', winnerSeats: Game.computeWinners(this.state) };
+        this.broadcastState();
       }
     } else {
       this.emptySince = null;
     }
+
+    // Auto-finish in-progress games that drop below 2 connected players for 2 min
+    if (this.state.phase === 'in_progress') {
+      const connected = this.state.players.filter(p => p.connected).length;
+      if (connected < 2) {
+        if (!this.underpopulatedSince) this.underpopulatedSince = now;
+        if (now - this.underpopulatedSince > UNDERPOPULATED_FINISH_MS) {
+          this.state = { ...this.state, phase: 'finished', winnerSeats: Game.computeWinners(this.state) };
+          this.underpopulatedSince = null;
+          this.broadcastState();
+        }
+      } else {
+        this.underpopulatedSince = null;
+      }
+    } else {
+      this.underpopulatedSince = null;
+    }
+
     await this.room.storage.setAlarm(now + ALARM_PERIOD_MS);
   }
 
@@ -178,6 +199,10 @@ export default class DotsAndBoxes implements Party.Server {
     if (!edge || (edge.orientation !== 'h' && edge.orientation !== 'v') ||
         typeof edge.row !== 'number' || typeof edge.col !== 'number') {
       return this.sendError(conn, ERROR_CODES.INVALID_EDGE, 'malformed edge', env.reqId);
+    }
+    const connectedCount = this.state.players.filter(p => p.connected).length;
+    if (connectedCount < 2) {
+      return this.sendError(conn, ERROR_CODES.NOT_IN_GAME, 'Waiting for another player to join', env.reqId);
     }
     this.state = Game.advancePastAfk(this.state);
     const result = Game.applyMove(this.state, edge, me.id, Date.now());

@@ -1,4 +1,4 @@
-:root {
+:root, [data-theme="light"] {
   /* Base */
   --bg: #ffffff;
   --bg-soft: #fafafa;
@@ -28,6 +28,29 @@
   --radius: 12px;
   --radius-sm: 6px;
 }
+[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --bg-soft: #18181b;
+  --panel: #131316;
+  --panel-border: #27272a;
+  --text: #fafafa;
+  --text-soft: #d4d4d8;
+  --text-muted: #71717a;
+  --accent-soft: rgba(6,214,160,0.18);
+  --line-empty: #2a2a2e;
+  --line-hover: #52525b;
+  --line-drawn: #fafafa;
+  --dot: #fafafa;
+  --shadow: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.6);
+}
+[data-theme="dark"] button { background: var(--text); color: var(--bg); border-color: var(--text); }
+[data-theme="dark"] button:hover:not(:disabled) { background: #e4e4e7; border-color: #e4e4e7; }
+[data-theme="dark"] button.ghost { background: transparent; color: var(--text-soft); border-color: var(--panel-border); }
+[data-theme="dark"] button.ghost:hover { background: #27272a; color: var(--text); border-color: #3f3f46; }
+[data-theme="dark"] button.accent { background: var(--accent); color: #04321f; border-color: var(--accent); }
+[data-theme="dark"] button.accent:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+[data-theme="dark"] .warning { background: rgba(251,191,36,0.08); border-color: rgba(251,191,36,0.3); color: #fcd34d; }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body {
@@ -49,6 +72,7 @@ body {
   align-items: center;
   gap: 12px;
   margin-bottom: 28px;
+  position: relative;
 }
 .brand-logo { width: 40px; height: 40px; flex-shrink: 0; }
 .brand-text {
@@ -57,6 +81,24 @@ body {
   letter-spacing: -0.02em;
   color: var(--text);
 }
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  padding: 0;
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+.theme-toggle:hover { background: var(--bg-soft); color: var(--text); border-color: var(--text-muted); }
+.theme-toggle svg { width: 18px; height: 18px; }
+[data-theme="light"] .icon-moon { display: none; }
+[data-theme="dark"] .icon-sun { display: none; }
 
 h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
 h2 { font-size: 20px; }

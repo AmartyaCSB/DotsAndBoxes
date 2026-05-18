@@ -128,6 +128,11 @@ export function tryDrawEdge(edge: { orientation: 'h' | 'v'; row: number; col: nu
   if (ctx.state.phase !== 'in_progress') return;
   if (ctx.state.currentSeat !== ctx.me.seatIdx) return;
   if (ctx.pendingEdge) return;
+  const connectedCount = ctx.state.players.filter(p => p.connected).length;
+  if (connectedCount < 2) {
+    showToast('Waiting for another player');
+    return;
+  }
   // Already drawn locally? (race)
   const grid = edge.orientation === 'h' ? ctx.state.hEdges : ctx.state.vEdges;
   if (grid[edge.row][edge.col] >= 0) return;
@@ -175,6 +180,14 @@ export function showToast(msg: string) {
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el!.classList.remove('show'), 2400);
 }
+
+// Theme toggle
+document.getElementById('theme-toggle')?.addEventListener('click', () => {
+  const cur = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  const next = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('dab.theme', next);
+});
 
 // Populate room-code badges + wire copy buttons
 const codeUpper = roomId!.toUpperCase();

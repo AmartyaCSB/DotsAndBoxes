@@ -150,7 +150,8 @@ function renderSvg(state: GameState, me: PlayerProfile | null) {
   boardEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
   boardEl.innerHTML = '';
 
-  const myTurn = me && state.currentSeat === me.seatIdx && state.phase === 'in_progress';
+  const connectedCount = state.players.filter(p => p.connected).length;
+  const myTurn = me && state.currentSeat === me.seatIdx && state.phase === 'in_progress' && connectedCount >= 2;
 
   // Box fills + labels
   for (let r = 0; r < rows; r++) {
@@ -261,6 +262,12 @@ function renderSvg(state: GameState, me: PlayerProfile | null) {
 function renderStatus(state: GameState, me: PlayerProfile | null) {
   if (state.phase !== 'in_progress') {
     statusEl.textContent = '';
+    return;
+  }
+  const connectedCount = state.players.filter(p => p.connected).length;
+  if (connectedCount < 2) {
+    statusEl.textContent = 'Waiting for another player to reconnect…';
+    statusEl.style.color = '';
     return;
   }
   const cur = state.players[state.currentSeat];

@@ -1,5 +1,12 @@
 import { generateRoomId, isValidRoomId } from './url';
 
+document.getElementById('theme-toggle')?.addEventListener('click', () => {
+  const cur = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  const next = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('dab.theme', next);
+});
+
 const createBtn = document.getElementById('create-btn') as HTMLButtonElement;
 const joinForm = document.getElementById('join-form') as HTMLFormElement;
 const joinInput = document.getElementById('join-input') as HTMLInputElement;
