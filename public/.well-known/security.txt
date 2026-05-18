@@ -1,0 +1,4 @@
+Contact: mailto:security@aeonic.earth
+Expires: 2027-05-18T00:00:00Z
+Canonical: https://dotsandboxes.aeonic.earth/.well-known/security.txt
+Preferred-Languages: en

@@ -20,12 +20,35 @@ const ALARM_PERIOD_MS = 30_000;
 const EMPTY_FINISH_MS = 2 * 60_000;
 const UNDERPOPULATED_FINISH_MS = 2 * 60_000;
 
+const ALLOWED_ORIGINS: RegExp[] = [
+  /^https:\/\/dotsandboxes\.aeonic\.earth$/,
+  /^https:\/\/[a-z0-9.-]+\.vercel\.app$/,
+  /^https?:\/\/localhost(:\d+)?$/,
+  /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+];
+
+const INVALID_NAME_CHARS = /[<>\x00-\x1f\x7f]/;
+
 export default class DotsAndBoxes implements Party.Server {
   state: GameState = Game.createInitialState(DEFAULT_CONFIG);
   emptySince: number | null = null;
   underpopulatedSince: number | null = null;
 
   constructor(readonly room: Party.Room) {}
+
+  // Reject WebSocket upgrades from origins we don't recognize. PartyKit's URL is
+  // public — without this, any page could open a socket and burn quota.
+  static async onBeforeConnect(req: Party.Request): Promise<Response | Request> {
+    const origin = req.headers.get('origin') || '';
+    if (!ALLOWED_ORIGINS.some(p => p.test(origin))) {
+      return new Response('Forbidden origin', { status: 403 });
+    }
+    return req;
+  }
+
+  onRequest(_req: Party.Request): Response {
+    return new Response('Method Not Allowed', { status: 405 });
+  }
 
   async onStart() {
     await this.room.storage.setAlarm(Date.now() + ALARM_PERIOD_MS);
@@ -171,6 +194,9 @@ export default class DotsAndBoxes implements Party.Server {
     const name = raw.trim().slice(0, 20);
     if (name.length < 1) {
       return this.sendError(conn, ERROR_CODES.BAD_REQUEST, 'name required', env.reqId);
+    }
+    if (INVALID_NAME_CHARS.test(name)) {
+      return this.sendError(conn, ERROR_CODES.BAD_REQUEST, 'name contains invalid characters', env.reqId);
     }
     const dup = this.state.players.some(p => p.id !== me.id && p.name && p.name.toLowerCase() === name.toLowerCase());
     if (dup) return this.sendError(conn, ERROR_CODES.BAD_REQUEST, 'name taken', env.reqId);
