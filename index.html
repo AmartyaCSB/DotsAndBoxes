@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dots and Boxes</title>
+<style>
+  :root {
+    --bg: #1a1a2e;
+    --panel: #232342;
+    --text: #e8e8f0;
+    --muted: #8a8aae;
+    --line-empty: #3a3a5c;
+    --line-hover: #6c6ca8;
+    --line-drawn: #e8e8f0;
+    --dot: #e8e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+  }
+  h1 {
+    margin: 0 0 16px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .panel {
+    background: var(--panel);
+    padding: 20px 28px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .setup label {
+    display: inline-block;
+    margin-right: 16px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .setup select, .setup button {
+    background: #2e2e54;
+    color: var(--text);
+    border: 1px solid #44447a;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 14px;
+    margin-left: 6px;
+    cursor: pointer;
+  }
+  .setup button {
+    background: #4f4fb0;
+    border-color: #4f4fb0;
+    margin-left: 12px;
+    padding: 6px 18px;
+    font-weight: 600;
+  }
+  .setup button:hover { background: #6363cc; }
+
+  .scoreboard {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .player-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: #2a2a4e;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    min-width: 130px;
+  }
+  .player-card.active {
+    border-color: var(--text);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .player-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+  }
+  .player-name { font-weight: 600; }
+  .player-score {
+    margin-left: auto;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  #board-wrapper {
+    background: var(--panel);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  svg { display: block; }
+  .dot { fill: var(--dot); }
+  .line-hit {
+    stroke: transparent;
+    stroke-width: 18;
+    cursor: pointer;
+  }
+  .line {
+    stroke: var(--line-empty);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 2 6;
+    pointer-events: none;
+    transition: stroke 0.15s, stroke-width 0.15s;
+  }
+  .line-group:hover .line {
+    stroke: var(--line-hover);
+    stroke-width: 5;
+    stroke-dasharray: none;
+  }
+  .line.drawn {
+    stroke: var(--line-drawn);
+    stroke-width: 6;
+    stroke-dasharray: none;
+  }
+  .line-group.drawn { cursor: default; }
+  .line-group.drawn:hover .line {
+    stroke: var(--line-drawn);
+    stroke-width: 6;
+    stroke-dasharray: none;
+  }
+  .box-fill {
+    transition: fill 0.3s;
+  }
+  .box-label {
+    font-weight: 700;
+    font-size: 18px;
+    fill: rgba(0,0,0,0.5);
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .status {
+    margin-top: 16px;
+    font-size: 16px;
+    color: var(--muted);
+    min-height: 22px;
+    text-align: center;
+  }
+  .winner-banner {
+    margin-top: 16px;
+    padding: 16px 24px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #ffd166, #ef476f);
+    color: #1a1a2e;
+    font-weight: 700;
+    font-size: 18px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <h1>Dots and Boxes</h1>
+
+  <div class="panel setup">
+    <label>Players
+      <select id="player-count">
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
+    </label>
+    <label>Grid
+      <select id="grid-size">
+        <option value="4">4 × 4</option>
+        <option value="5" selected>5 × 5</option>
+        <option value="6">6 × 6</option>
+        <option value="7">7 × 7</option>
+      </select>
+    </label>
+    <button id="new-game">New Game</button>
+  </div>
+
+  <div class="panel">
+    <div class="scoreboard" id="scoreboard"></div>
+  </div>
+
+  <div id="board-wrapper">
+    <svg id="board" width="500" height="500"></svg>
+  </div>
+
+  <div class="status" id="status"></div>
+
+<script>
+const PLAYER_COLORS = ['#ef476f', '#06d6a0', '#ffd166', '#118ab2'];
+const PLAYER_NAMES  = ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+const CELL = 80;
+const PAD  = 30;
+
+const $ = id => document.getElementById(id);
+const boardEl     = $('board');
+const scoreboardEl = $('scoreboard');
+const statusEl    = $('status');
+
+let state = null;
+
+function newGame() {
+  const numPlayers = +$('player-count').value;
+  const N = +$('grid-size').value;          // N dots per side -> (N-1)x(N-1) boxes
+  state = {
+    numPlayers,
+    N,
+    current: 0,
+    hLines: Array.from({length: N},     () => Array(N - 1).fill(-1)), // [row][col]
+    vLines: Array.from({length: N - 1}, () => Array(N).fill(-1)),     // [row][col]
+    boxes:  Array.from({length: N - 1}, () => Array(N - 1).fill(-1)),
+    scores: Array(numPlayers).fill(0),
+    totalBoxes: (N - 1) * (N - 1),
+    filledBoxes: 0,
+    gameOver: false,
+  };
+  render();
+}
+
+function render() {
+  renderScoreboard();
+  renderBoard();
+  renderStatus();
+}
+
+function renderScoreboard() {
+  scoreboardEl.innerHTML = '';
+  for (let i = 0; i < state.numPlayers; i++) {
+    const card = document.createElement('div');
+    card.className = 'player-card' + (i === state.current && !state.gameOver ? ' active' : '');
+    card.innerHTML = `
+      <div class="player-swatch" style="background:${PLAYER_COLORS[i]}"></div>
+      <div class="player-name">${PLAYER_NAMES[i]}</div>
+      <div class="player-score">${state.scores[i]}</div>
+    `;
+    scoreboardEl.appendChild(card);
+  }
+}
+
+function renderBoard() {
+  const { N } = state;
+  const size = PAD * 2 + (N - 1) * CELL;
+  boardEl.setAttribute('width', size);
+  boardEl.setAttribute('height', size);
+  boardEl.innerHTML = '';
+
+  // Box fills + labels
+  for (let r = 0; r < N - 1; r++) {
+    for (let c = 0; c < N - 1; c++) {
+      const owner = state.boxes[r][c];
+      if (owner < 0) continue;
+      const x = PAD + c * CELL;
+      const y = PAD + r * CELL;
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('class', 'box-fill');
+      rect.setAttribute('x', x);
+      rect.setAttribute('y', y);
+      rect.setAttribute('width', CELL);
+      rect.setAttribute('height', CELL);
+      rect.setAttribute('fill', PLAYER_COLORS[owner] + 'cc');
+      boardEl.appendChild(rect);
+
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('class', 'box-label');
+      label.setAttribute('x', x + CELL / 2);
+      label.setAttribute('y', y + CELL / 2);
+      label.textContent = 'P' + (owner + 1);
+      boardEl.appendChild(label);
+    }
+  }
+
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const makeLineGroup = (x1, y1, x2, y2, owner, onClick) => {
+    const g = document.createElementNS(SVGNS, 'g');
+    g.setAttribute('class', 'line-group' + (owner >= 0 ? ' drawn' : ''));
+    const visible = document.createElementNS(SVGNS, 'line');
+    visible.setAttribute('class', 'line' + (owner >= 0 ? ' drawn' : ''));
+    visible.setAttribute('x1', x1); visible.setAttribute('y1', y1);
+    visible.setAttribute('x2', x2); visible.setAttribute('y2', y2);
+    g.appendChild(visible);
+    const hit = document.createElementNS(SVGNS, 'line');
+    hit.setAttribute('class', 'line-hit');
+    hit.setAttribute('x1', x1); hit.setAttribute('y1', y1);
+    hit.setAttribute('x2', x2); hit.setAttribute('y2', y2);
+    if (owner < 0) hit.addEventListener('click', onClick);
+    else hit.style.pointerEvents = 'none';
+    g.appendChild(hit);
+    return g;
+  };
+
+  // Horizontal lines
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N - 1; c++) {
+      const owner = state.hLines[r][c];
+      const x1 = PAD + c * CELL;
+      const x2 = PAD + (c + 1) * CELL;
+      const y  = PAD + r * CELL;
+      boardEl.appendChild(makeLineGroup(x1, y, x2, y, owner, () => playMove('h', r, c)));
+    }
+  }
+
+  // Vertical lines
+  for (let r = 0; r < N - 1; r++) {
+    for (let c = 0; c < N; c++) {
+      const owner = state.vLines[r][c];
+      const x  = PAD + c * CELL;
+      const y1 = PAD + r * CELL;
+      const y2 = PAD + (r + 1) * CELL;
+      boardEl.appendChild(makeLineGroup(x, y1, x, y2, owner, () => playMove('v', r, c)));
+    }
+  }
+
+  // Dots (drawn last so they sit on top)
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('class', 'dot');
+      dot.setAttribute('cx', PAD + c * CELL);
+      dot.setAttribute('cy', PAD + r * CELL);
+      dot.setAttribute('r', 5);
+      boardEl.appendChild(dot);
+    }
+  }
+}
+
+function renderStatus() {
+  if (state.gameOver) {
+    const max = Math.max(...state.scores);
+    const winners = state.scores
+      .map((s, i) => s === max ? i : -1)
+      .filter(i => i >= 0);
+    const banner = document.createElement('div');
+    banner.className = 'winner-banner';
+    banner.textContent = winners.length === 1
+      ? `🏆 ${PLAYER_NAMES[winners[0]]} wins with ${max} boxes!`
+      : `🤝 Tie between ${winners.map(i => PLAYER_NAMES[i]).join(', ')} (${max} boxes each)`;
+    statusEl.innerHTML = '';
+    statusEl.appendChild(banner);
+  } else {
+    statusEl.textContent = `${PLAYER_NAMES[state.current]}'s turn — click a line between two dots`;
+    statusEl.style.color = PLAYER_COLORS[state.current];
+  }
+}
+
+function playMove(kind, r, c) {
+  if (state.gameOver) return;
+  const grid = kind === 'h' ? state.hLines : state.vLines;
+  if (grid[r][c] >= 0) return;
+  grid[r][c] = state.current;
+
+  // Check which adjacent boxes (if any) got completed by this move.
+  const completed = [];
+  if (kind === 'h') {
+    // box above this h-line
+    if (r > 0 && boxComplete(r - 1, c)) completed.push([r - 1, c]);
+    // box below this h-line
+    if (r < state.N - 1 && boxComplete(r, c)) completed.push([r, c]);
+  } else {
+    // box left of this v-line
+    if (c > 0 && boxComplete(r, c - 1)) completed.push([r, c - 1]);
+    // box right of this v-line
+    if (c < state.N - 1 && boxComplete(r, c)) completed.push([r, c]);
+  }
+
+  for (const [br, bc] of completed) {
+    state.boxes[br][bc] = state.current;
+    state.scores[state.current]++;
+    state.filledBoxes++;
+  }
+
+  if (state.filledBoxes === state.totalBoxes) {
+    state.gameOver = true;
+  } else if (completed.length === 0) {
+    // Only advance turn if no box was completed
+    state.current = (state.current + 1) % state.numPlayers;
+  }
+
+  render();
+}
+
+function boxComplete(r, c) {
+  return state.hLines[r][c] >= 0
+      && state.hLines[r + 1][c] >= 0
+      && state.vLines[r][c] >= 0
+      && state.vLines[r][c + 1] >= 0;
+}
+
+$('new-game').addEventListener('click', newGame);
+newGame();
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "dotsandboxes",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Real-time multiplayer Dots and Boxes",
+  "scripts": {
+    "dev": "concurrently -k -n party,esbuild -c blue,yellow \"npm:dev:party\" \"npm:dev:esbuild\"",
+    "dev:party": "partykit dev",
+    "dev:esbuild": "esbuild public/src/client.ts public/src/landing.ts --bundle --outdir=public/dist --format=esm --target=es2020 --sourcemap --watch --define:PARTYKIT_HOST='\"localhost:1999\"'",
+    "build": "node scripts/build.mjs",
+    "deploy:party": "partykit deploy",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "partysocket": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.20.0",
+    "partykit": "^0.0.115",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  }
+}

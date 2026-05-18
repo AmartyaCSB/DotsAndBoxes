@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dots and Boxes — Room</title>
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <h1>Dots and Boxes</h1>
+  <div id="connection-status">Connecting…</div>
+
+  <!-- Lobby panel (visible while phase === 'lobby') -->
+  <div id="lobby" class="panel">
+    <h2>Lobby</h2>
+    <div class="row" style="margin-bottom: 12px;">
+      <label class="field" style="flex:1;">
+        Your name
+        <input id="name-input" type="text" maxlength="20" placeholder="Pick a name" autocomplete="off" />
+      </label>
+      <button id="copy-link-btn" class="ghost" type="button">Copy invite link</button>
+      <button id="leave-btn" class="ghost" type="button">Leave</button>
+    </div>
+
+    <h2 style="margin-top:16px;">Players</h2>
+    <div id="players-list"></div>
+
+    <div id="host-panel" hidden style="margin-top: 16px;">
+      <h2>Game setup (host)</h2>
+      <div class="row">
+        <label class="field">
+          Grid
+          <select id="cfg-rows">
+            <option value="3">3 × 3</option>
+            <option value="4">4 × 4</option>
+            <option value="5" selected>5 × 5</option>
+            <option value="6">6 × 6</option>
+            <option value="7">7 × 7</option>
+          </select>
+        </label>
+        <label class="field">
+          Max players
+          <select id="cfg-max">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+          </select>
+        </label>
+        <div class="spacer"></div>
+        <button id="start-btn" type="button">Start game</button>
+      </div>
+    </div>
+
+    <div id="lobby-warning" class="warning" hidden></div>
+  </div>
+
+  <!-- Game panel (visible while phase === 'in_progress' or 'finished') -->
+  <div id="game" class="panel" hidden>
+    <div class="row between" style="margin-bottom:12px;">
+      <div id="you-pill" class="muted"></div>
+      <button id="leave-btn-game" class="ghost" type="button">Leave</button>
+    </div>
+    <div id="scoreboard" class="scoreboard"></div>
+  </div>
+
+  <div id="board-wrapper" hidden>
+    <svg id="board" width="500" height="500" aria-label="Dots and boxes game board" role="grid"></svg>
+  </div>
+  <div id="status" class="status" hidden></div>
+
+  <div id="endgame" class="panel narrow" hidden style="text-align:center;">
+    <div id="winner-banner" class="winner-banner"></div>
+    <div class="row" style="justify-content:center; margin-top:14px;">
+      <button id="play-again-btn" type="button" hidden>Play again</button>
+      <button id="back-home-btn" class="ghost" type="button">Back to home</button>
+    </div>
+  </div>
+
+  <script type="module" src="/dist/client.js"></script>
+</body>
+</html>
